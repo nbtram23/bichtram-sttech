@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using bichtram.EntityFrameworkCore;
 
@@ -11,9 +12,11 @@ using bichtram.EntityFrameworkCore;
 namespace bichtram.Migrations
 {
     [DbContext(typeof(bichtramDbContext))]
-    partial class bichtramDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260430051055_Added_Brand_Table")]
+    partial class Added_Brand_Table
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

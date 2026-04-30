@@ -53,6 +53,14 @@ namespace bichtram.Web.Startup
                         icon: "fas fa-theater-masks",
                         permissionDependency: new SimplePermissionDependency(PermissionNames.Pages_Roles)
                     )
+                ).AddItem( 
+                    new MenuItemDefinition(
+                        PageNames.Brands,
+                        L("Brands"),
+                        url: "Brands",
+                        icon: "fas fa-tags",
+                        permissionDependency: new SimplePermissionDependency(PermissionNames.Pages_Brands)
+                    )
                 )
                 .AddItem( // Menu items below is just for demonstration!
                     new MenuItemDefinition(

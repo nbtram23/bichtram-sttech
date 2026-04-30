@@ -1,0 +1,171 @@
+﻿@using bichtram.Web.Startup
+@{
+    ViewBag.CurrentPageName = PageNames.Brands;
+}
+
+@section scripts
+{
+    <script>
+        $(function () {
+            var _brandService = abp.services.app.brand;
+            var _$createModal = $('#BrandCreateModal');
+            var _$editModal = $('#BrandEditModal');
+
+            function loadBrands() {
+                abp.ui.setBusy('#BrandsCard');
+                _brandService.getAll({}).done(function (result) {
+                    var tbody = $('#BrandsTable tbody');
+                    tbody.empty();
+                    $.each(result.items, function (index, brand) {
+                        var tr = $('<tr></tr>');
+                        tr.append('<td>' + (brand.name || '') + '</td>');
+                        tr.append('<td>' + (brand.description || '') + '</td>');
+
+                        var actionTd = $('<td class="text-center"></td>');
+
+                        actionTd.append('<button class="btn btn-sm btn-info edit-brand" data-id="' + brand.id + '"><i class="fas fa-pencil-alt"></i> Sửa</button> ');
+ 
+                        actionTd.append('<button class="btn btn-sm btn-danger delete-brand" data-id="' + brand.id + '" data-name="' + brand.name + '"><i class="fas fa-trash"></i> Xóa</button>');
+                        tr.append(actionTd);
+                        tbody.append(tr);
+                    });
+                }).always(function () {
+                    abp.ui.clearBusy('#BrandsCard');
+                });
+            }
+
+            loadBrands();
+            $('#CreateNewBrandButton').on('click', function () {
+                _$createModal.modal('show');
+            });
+
+            $('#BrandCreateForm').submit(function (e) {
+                e.preventDefault();
+                var brand = $(this).serializeFormToObject();
+                abp.ui.setBusy(_$createModal);
+                _brandService.create(brand).done(function () {
+                    _$createModal.modal('hide');
+                    $('#BrandCreateForm')[0].reset();
+                    abp.notify.success("Thêm mới thành công!");
+                    loadBrands();
+                }).always(function () {
+                    abp.ui.clearBusy(_$createModal);
+                });
+            });
+
+          
+            $('#BrandsTable').on('click', '.edit-brand', function () {
+                var brandId = $(this).attr("data-id");
+
+                _brandService.get({ id: brandId }).done(function (result) {
+   
+                    var $form = $('#BrandEditForm');
+                    $form.find('input[name="Id"]').val(result.id);
+                    $form.find('input[name="Name"]').val(result.name);
+                    $form.find('textarea[name="Description"]').val(result.description);
+
+                    _$editModal.modal('show');
+                });
+            });
+
+            $('#BrandEditForm').submit(function (e) {
+                e.preventDefault();
+                var brand = $(this).serializeFormToObject();
+                abp.ui.setBusy(_$editModal);
+                _brandService.update(brand).done(function () {
+                    _$editModal.modal('hide');
+                    abp.notify.success("Cập nhật thành công!");
+                    loadBrands();
+                }).always(function () {
+                    abp.ui.clearBusy(_$editModal);
+                });
+            });
+
+            $('#BrandsTable').on('click', '.delete-brand', function () {
+                var brandId = $(this).attr("data-id");
+                var brandName = $(this).attr("data-name");
+                abp.message.confirm("Xóa thương hiệu '" + brandName + "'?", "Cảnh báo", function (isConfirmed) {
+                    if (isConfirmed) {
+                        _brandService.delete({ id: brandId }).done(function () {
+                            abp.notify.success("Đã xóa xong!");
+                            loadBrands();
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+}
+
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6"><h1>Quản lý thương hiệu</h1></div>
+            <div class="col-sm-6">
+                <button id="CreateNewBrandButton" class="btn btn-primary float-sm-right"><i class="fa fa-plus-square"></i> Tạo mới</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="card" id="BrandsCard">
+            <div class="card-body">
+                <table id="BrandsTable" class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Tên thương hiệu</th>
+                            <th>Mô tả</th>
+                            <th style="width: 200px" class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="modal fade" id="BrandCreateModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm mới thương hiệu</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <form id="BrandCreateForm">
+                <div class="modal-body">
+                    <div class="form-group"><label>Tên</label><input type="text" name="Name" class="form-control" required></div>
+                    <div class="form-group"><label>Mô tả</label><textarea name="Description" class="form-control"></textarea></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="BrandEditModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">Cập nhật thương hiệu</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <form id="BrandEditForm">
+                <input type="hidden" name="Id" /> <!-- Quan trọng để hệ thống biết sửa dòng nào -->
+                <div class="modal-body">
+                    <div class="form-group"><label>Tên mới</label><input type="text" name="Name" class="form-control" required></div>
+                    <div class="form-group"><label>Mô tả mới</label><textarea name="Description" class="form-control"></textarea></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-info">Cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
