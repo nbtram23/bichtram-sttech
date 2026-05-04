@@ -4,7 +4,7 @@ using bichtram.Brands.Dto;
 
 namespace bichtram.Brands
 {
-    public interface IBrandAppService : IAsyncCrudAppService<BrandDto, int, PagedAndSortedResultRequestDto, CreateBrandDto, UpdateBrandDto>
+    public interface IBrandAppService : IAsyncCrudAppService<BrandDto, int, PagedBrandResultRequestDto, CreateBrandDto, UpdateBrandDto>
     {
     }
 }

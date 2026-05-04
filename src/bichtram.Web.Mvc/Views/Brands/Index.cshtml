@@ -3,8 +3,7 @@
     ViewBag.CurrentPageName = PageNames.Brands;
 }
 
-@section scripts
-{
+@section scripts {
     <script>
         $(function () {
             var _brandService = abp.services.app.brand;
@@ -13,7 +12,10 @@
 
             function loadBrands() {
                 abp.ui.setBusy('#BrandsCard');
-                _brandService.getAll({}).done(function (result) {
+
+                var filterKeyword = $('#BrandSearchKeyword').val();
+
+                _brandService.getAll({ keyword: filterKeyword }).done(function (result) {
                     var tbody = $('#BrandsTable tbody');
                     tbody.empty();
                     $.each(result.items, function (index, brand) {
@@ -22,10 +24,9 @@
                         tr.append('<td>' + (brand.description || '') + '</td>');
 
                         var actionTd = $('<td class="text-center"></td>');
-
                         actionTd.append('<button class="btn btn-sm btn-info edit-brand" data-id="' + brand.id + '"><i class="fas fa-pencil-alt"></i> Sửa</button> ');
- 
                         actionTd.append('<button class="btn btn-sm btn-danger delete-brand" data-id="' + brand.id + '" data-name="' + brand.name + '"><i class="fas fa-trash"></i> Xóa</button>');
+
                         tr.append(actionTd);
                         tbody.append(tr);
                     });
@@ -35,6 +36,25 @@
             }
 
             loadBrands();
+
+            $('#SearchBrandsButton').click(function (e) {
+                e.preventDefault();
+                loadBrands();
+            });
+
+            $('#BrandSearchKeyword').keypress(function (e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                    loadBrands();
+                }
+            });
+
+            $('#ClearSearchBrandsButton').click(function (e) {
+                e.preventDefault();
+                $('#BrandSearchKeyword').val('');
+                loadBrands();
+            });
+
             $('#CreateNewBrandButton').on('click', function () {
                 _$createModal.modal('show');
             });
@@ -53,17 +73,13 @@
                 });
             });
 
-          
             $('#BrandsTable').on('click', '.edit-brand', function () {
                 var brandId = $(this).attr("data-id");
-
                 _brandService.get({ id: brandId }).done(function (result) {
-   
                     var $form = $('#BrandEditForm');
                     $form.find('input[name="Id"]').val(result.id);
                     $form.find('input[name="Name"]').val(result.name);
                     $form.find('textarea[name="Description"]').val(result.description);
-
                     _$editModal.modal('show');
                 });
             });
@@ -112,6 +128,19 @@
     <div class="container-fluid">
         <div class="card" id="BrandsCard">
             <div class="card-body">
+
+                <div class="row mb-3">
+                    <div class="col-sm-12 col-md-6">
+                        <div class="input-group">
+                            <input type="text" id="BrandSearchKeyword" class="form-control" placeholder="Nhập tên hoặc mô tả để tìm...">
+                            <div class="input-group-append">
+                                <button type="button" id="SearchBrandsButton" class="btn btn-primary"><i class="fas fa-search"></i></button>
+                                <button type="button" id="ClearSearchBrandsButton" class="btn btn-secondary"><i class="fas fa-times"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <table id="BrandsTable" class="table table-striped table-bordered">
                     <thead>
                         <tr>
@@ -156,7 +185,7 @@
                 <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
             </div>
             <form id="BrandEditForm">
-                <input type="hidden" name="Id" /> <!-- Quan trọng để hệ thống biết sửa dòng nào -->
+                <input type="hidden" name="Id" />
                 <div class="modal-body">
                     <div class="form-group"><label>Tên mới</label><input type="text" name="Name" class="form-control" required></div>
                     <div class="form-group"><label>Mô tả mới</label><textarea name="Description" class="form-control"></textarea></div>
